@@ -17,6 +17,7 @@
 - **Respect your Daily Notes setup** — uses your configured folder, format, and template from Daily Notes or Periodic Notes.
 - **Nested paths work** — detects existing notes with formats such as `YYYY/MM/DD` and `YYYY/YYYY.MM.DD`.
 - **Startup automation stays optional** _(fixed in v0.2.1)_ — create today's note, auto-fill missed notes, or run the command manually without duplicate creation attempts.
+- **Safer backfill modal** _(new in v0.3.0)_ — use quick date presets, live range stats, and disabled confirmation for invalid or empty work.
 
 ## Nested Daily Note Formats
 
@@ -42,6 +43,10 @@ Creates:  2025/12/29.md, 2025/12/30.md, 2025/12/31.md, 2026/01/02.md, 2026/01/03
 ```
 
 If more than seven notes would be created on startup, Daily Note Plus asks for confirmation before continuing.
+
+The backfill modal includes quick presets for the last 7 days, last 30 days, this month, and last month. Presets only fill the date inputs; no files are created until you select `Start backfill`. The modal also shows the inclusive range length and how many daily notes already exist in that range.
+
+Invalid ranges disable the confirmation button. Future end dates are clamped to today, and very large ranges are capped at 3650 days to avoid accidental oversized backfills.
 
 ![Options](images/options.png)
 
@@ -161,6 +166,7 @@ No. Remove `o1xhack/obsidian-daily-note-plus` from BRAT's beta plugin list so BR
 - [x] Publish release `0.2.0` for Obsidian community review warnings.
 - [x] Publish release `0.2.1` to prevent duplicate startup creation attempts.
 - [x] Accepted into the Obsidian community plugin directory.
+- [x] Publish release `0.3.0` with quick date presets, live range stats, input validation, and tests.
 - [ ] Add broader in-vault test coverage for common date formats and long backfill ranges.
 
 ## Contributing

@@ -1,7 +1,14 @@
 import { Modal, moment, normalizePath, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import type { App, TFile } from 'obsidian';
+import type { App, ButtonComponent, TFile } from 'obsidian';
 import type { Moment } from 'moment';
 import { appHasDailyNotesPluginLoaded, getDailyNoteSettings, createDailyNote } from "obsidian-daily-notes-interface";
+import {
+	countDatesInRange,
+	getPresetDateRange,
+	MAX_BACKFILL_RANGE_DAYS,
+	normalizeBackfillRange,
+} from './date-range';
+import type { DateRangePreset } from './date-range';
 
 interface DailyNoteCreatorSettings {
 	autoCreateCurrentDaily: boolean;
@@ -129,42 +136,78 @@ class DailyNoteCreatorModal extends Modal {
 		this.onConfirm = onConfirm;
 	}
 
-	onOpen(): void {
-		const { titleEl, contentEl } = this;
-		titleEl.setText('Create missing daily notes');
+		onOpen(): void {
+			const { titleEl, contentEl } = this;
+			titleEl.setText('Backfill daily notes');
+
+		const applyPreset = (preset: DateRangePreset): void => {
+			const { start, end } = getPresetDateRange(preset, moment());
+			this.startDate = start;
+			this.endDate = end;
+			startDateInputEl.value = this.startDate.format(DEFAULT_DAILY_NOTE_FORMAT);
+			endDateInputEl.value = this.endDate.format(DEFAULT_DAILY_NOTE_FORMAT);
+			update();
+		};
+
+		// Quick presets fill the date inputs. They do not create notes.
+		new Setting(contentEl)
+			.setName('Quick ranges')
+			.addButton(button => button
+				.setButtonText('Last 7 days')
+				.onClick(() => applyPreset(`last-7`)))
+			.addButton(button => button
+				.setButtonText('Last 30 days')
+				.onClick(() => applyPreset(`last-30`)))
+			.addButton(button => button
+				.setButtonText('This month')
+				.onClick(() => applyPreset(`this-month`)))
+			.addButton(button => button
+				.setButtonText('Last month')
+				.onClick(() => applyPreset(`last-month`)));
 
 		// Create input fields for start and end date
 		const startDateInput = new Setting(contentEl)
 			.setName('Start date')
-		startDateInput.controlEl.createEl('input', {
+		const startDateInputEl = startDateInput.controlEl.createEl('input', {
 			attr: { type: 'date' },
-			value: this.startDate.format('YYYY-MM-DD')
-		}).addEventListener('change', (event) => {
+			value: this.startDate.format(DEFAULT_DAILY_NOTE_FORMAT)
+		});
+		startDateInputEl.addEventListener('change', (event) => {
 			this.startDate = moment((event.target as HTMLInputElement).value);
 			update();
 		});
 		const endDateInput = new Setting(contentEl)
 			.setName('End date')
-		endDateInput.controlEl.createEl('input', {
+		const endDateInputEl = endDateInput.controlEl.createEl('input', {
 			attr: { type: 'date' },
-			value: this.endDate.format('YYYY-MM-DD')
-		}).addEventListener('change', (event) => {
+			value: this.endDate.format(DEFAULT_DAILY_NOTE_FORMAT)
+		});
+		endDateInputEl.addEventListener('change', (event) => {
 			this.endDate = moment((event.target as HTMLInputElement).value);
 			update();
 		});
 
+		const rangeStats = new Setting(contentEl)
+			.setName('Range: 0 days')
+			.setDesc('Existing daily notes: 0');
+
 		// Create confirmation buttons
+		let confirmButton: ButtonComponent | null = null;
 		const confirmation = new Setting(contentEl)
-			.addButton(confirm => confirm
-				.setButtonText(`Confirm`)
-				.setCta()
-				.onClick(async () => {
-					this.close();
-					await createDailyNotes(this.missingDates);
-					if (this.onConfirm) {
-						this.onConfirm();
-					}
-				}))
+			.addButton(confirm => {
+				confirmButton = confirm;
+					confirm
+						.setButtonText(`Start backfill`)
+						.setCta()
+						.setDisabled(true)
+						.onClick(async () => {
+							this.close();
+							await createDailyNotes(this.missingDates);
+							if (this.onConfirm) {
+								this.onConfirm();
+							}
+						});
+				})
 			.addButton(cancel => cancel
 				.setButtonText(`Cancel`)
 				.onClick(() => {
@@ -175,16 +218,28 @@ class DailyNoteCreatorModal extends Modal {
 		const update = (): void => {
 			const { format } = getDailyNoteSettings();
 			const dateFormat = format ?? DEFAULT_DAILY_NOTE_FORMAT;
-			const startDateValid = this.startDate.isValid() && this.startDate.year().toString().length === 4;
-			const endDateValid = this.endDate.isValid() && this.endDate.year().toString().length === 4;
-			startDateInput.setDesc(startDateValid ? this.startDate.format(dateFormat) : `Invalid date`);
-			endDateInput.setDesc(endDateValid ? this.endDate.format(dateFormat) : `Invalid date`);
-			if (startDateValid && endDateValid) {
-				this.missingDates = findMissingDates(this.dailyNotes, this.startDate, this.endDate);
+			const normalizedRange = normalizeBackfillRange(this.startDate, this.endDate, moment(), MAX_BACKFILL_RANGE_DAYS);
+			startDateInput.setDesc(normalizedRange.start ? normalizedRange.start.format(dateFormat) : `Invalid date`);
+			endDateInput.setDesc(normalizedRange.end ? normalizedRange.end.format(dateFormat) : `Invalid date`);
+
+			if (normalizedRange.isValid && normalizedRange.start && normalizedRange.end) {
+				const existingCount = countDatesInRange(normalizedRange.start, normalizedRange.end, date => Boolean(getDailyNote(date, this.dailyNotes)));
+				this.missingDates = findMissingDates(this.dailyNotes, normalizedRange.start, normalizedRange.end);
+				const rangeNotes = [
+					normalizedRange.truncated ? `truncated to ${MAX_BACKFILL_RANGE_DAYS} days` : null,
+					normalizedRange.futureClamped ? `future end date clamped to today` : null,
+				].filter((note): note is string => Boolean(note));
+				rangeStats
+					.setName(`Range: ${normalizedRange.dayCount} day` + (normalizedRange.dayCount == 1 ? `` : `s`))
+					.setDesc(`Existing daily notes: ${existingCount}` + (rangeNotes.length ? ` (${rangeNotes.join(`; `)})` : ``));
 			} else {
 				this.missingDates = [];
+				rangeStats
+					.setName('Range: 0 days')
+					.setDesc('Existing daily notes: 0');
 			}
 			confirmation.setName(`Create ${this.missingDates.length} missing daily note` + (this.missingDates.length == 1 ? `?` : `s?`));
+			confirmButton?.setDisabled(!normalizedRange.isValid || this.missingDates.length === 0);
 		}
 
 		update();
