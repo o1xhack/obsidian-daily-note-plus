@@ -1,6 +1,6 @@
 {
 	"name": "daily-note-plus",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"description": "Automatically creates missing daily notes",
 	"main": "main.js",
 	"scripts": {

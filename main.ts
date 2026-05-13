@@ -1,5 +1,5 @@
-import { App, Modal, moment, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
-import { appHasDailyNotesPluginLoaded, getDailyNoteSettings, getAllDailyNotes, getDateFromFile, getDailyNote, createDailyNote } from "obsidian-daily-notes-interface";
+import { App, Modal, moment, normalizePath, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { appHasDailyNotesPluginLoaded, getDailyNoteSettings, createDailyNote } from "obsidian-daily-notes-interface";
 
 interface DailyNoteCreatorSettings {
 	autoCreateCurrentDaily: boolean;
@@ -9,6 +9,59 @@ interface DailyNoteCreatorSettings {
 const DEFAULT_SETTINGS: DailyNoteCreatorSettings = {
 	autoCreateCurrentDaily: true,
 	autoCreateMissedDailies: false,
+}
+
+function getDateUID(date: moment.Moment) {
+	return `day-${date.clone().startOf(`day`).format()}`;
+}
+
+function stripMarkdownExtension(path: string) {
+	return path.endsWith(`.md`) ? path.slice(0, -3) : path;
+}
+
+function getDailyNoteRelativePath(file: TFile, folder?: string) {
+	const normalizedFilePath = stripMarkdownExtension(normalizePath(file.path));
+	const trimmedFolder = (folder ?? ``).trim();
+	const normalizedFolder = trimmedFolder ? normalizePath(trimmedFolder).replace(/\/+$/, ``) : ``;
+
+	if (!normalizedFolder) {
+		return normalizedFilePath;
+	}
+
+	const folderPrefix = `${normalizedFolder}/`;
+	if (!normalizedFilePath.startsWith(folderPrefix)) {
+		return null;
+	}
+
+	return normalizedFilePath.slice(folderPrefix.length);
+}
+
+function getDateFromDailyNotePath(file: TFile) {
+	const { folder, format } = getDailyNoteSettings();
+	const relativePath = getDailyNoteRelativePath(file, folder);
+	if (!relativePath) {
+		return null;
+	}
+
+	const noteDate = moment(relativePath, format ?? `YYYY-MM-DD`, true);
+	return noteDate.isValid() ? noteDate : null;
+}
+
+function getAllDailyNotes(app: App) {
+	const dailyNotes: Record<string, TFile> = {};
+
+	for (const file of app.vault.getMarkdownFiles()) {
+		const date = getDateFromDailyNotePath(file);
+		if (date) {
+			dailyNotes[getDateUID(date)] = file;
+		}
+	}
+
+	return dailyNotes;
+}
+
+function getDailyNote(date: moment.Moment, dailyNotes: Record<string, TFile>) {
+	return dailyNotes[getDateUID(date)] ?? null;
 }
 
 // Find the date of the first and last daily notes that exist in the vault
@@ -22,8 +75,8 @@ function getFirstAndLastDates(dailyNotes: Record<string, TFile>) {
 
 	const [, firstFile] = sortedDailyNotes[0];
 	const [, lastFile] = sortedDailyNotes[sortedDailyNotes.length - 1];
-	const firstDate = getDateFromFile(firstFile, `day`);
-	const lastDate = getDateFromFile(lastFile, `day`);
+	const firstDate = getDateFromDailyNotePath(firstFile);
+	const lastDate = getDateFromDailyNotePath(lastFile);
 
 	return { first: firstDate, last: lastDate };
 }
@@ -151,7 +204,7 @@ export default class DailyNoteCreator extends Plugin {
 					new Notice(`Daily notes are disabled`);
 					return;
 				}
-				const dailyNotes = getAllDailyNotes();
+				const dailyNotes = getAllDailyNotes(this.app);
 				const { last } = getFirstAndLastDates(dailyNotes);
 				const today = moment();
 				new DailyNoteCreatorModal(this.app, dailyNotes, last ?? today, today).open();
@@ -167,7 +220,7 @@ export default class DailyNoteCreator extends Plugin {
 			if (this.settings.autoCreateCurrentDaily) {
 				if (this.settings.autoCreateMissedDailies) {
 					// Create missed daily notes
-					const dailyNotes = await getAllDailyNotes();
+					const dailyNotes = getAllDailyNotes(this.app);
 					const { last } = getFirstAndLastDates(dailyNotes);
 					const today = moment();
 					const missing = findMissingDates(dailyNotes, last ?? today, today);
@@ -215,7 +268,7 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 		}
 
 		// Find missing notes since first daily note
-		const dailyNotes = getAllDailyNotes();
+		const dailyNotes = getAllDailyNotes(this.app);
 		const { first, last } = getFirstAndLastDates(dailyNotes);
 		const today = moment();
 		const missing = findMissingDates(dailyNotes, first ?? today, today);

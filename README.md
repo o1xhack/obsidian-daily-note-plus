@@ -12,6 +12,8 @@ Daily Note Plus is derived from Mario Holubar's [Daily note creator](https://git
 
 ![options](images/options.png)
 
+Daily Note Plus reads the Daily Notes or Periodic Notes folder and format settings when it checks existing notes. Formats with folder segments, such as `YYYY/MM/DD` or `YYYY/YYYY.MM.DD`, are supported for both creating notes and detecting which dates already exist.
+
 **Create daily note on startup** lets you disable the built-in `open daily note on startup` option. This is useful if you want to open the vault on your last open note, or your homepage.
 
 **Auto-create missed daily notes on startup** will fill in daily notes for days that you didn't open the vault. If this is more than a week, it will ask for confirmation.
@@ -22,4 +24,4 @@ Daily Note Plus is derived from Mario Holubar's [Daily note creator](https://git
 
 ## Known issues
 
-As of right now, the plugin will misbehave if your daily notes are organized in a folder structure (e.g. `YYYY/MM/DD`) or if they have text other than the date in the filename (e.g. `2023-12-31 New Year's Eve`). Both of these problems are caused by the underlying [obsidian-daily-notes-interface](https://github.com/liamcain/obsidian-daily-notes-interface) package and have open issues: [#21](https://github.com/liamcain/obsidian-daily-notes-interface/issues/21), [#27](https://github.com/liamcain/obsidian-daily-notes-interface/issues/27). I will update this plugin once these are resolved.
+The plugin still expects daily note paths to strictly match your configured Daily Notes format. File names with extra title text, such as `2023-12-31 Beach day.md`, are not treated as daily notes.
