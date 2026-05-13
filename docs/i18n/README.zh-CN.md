@@ -15,8 +15,8 @@
 
 - **补齐任意日期范围** —— 不用手动打开每一天，可以一次性创建一段时间内缺失的 Daily Notes。
 - **尊重你的 Daily Notes 配置** —— 读取 Daily Notes 或 Periodic Notes 里的 folder、format、template。
-- **支持层级路径** _(v0.1.0 新增)_ —— 可以识别 `YYYY/MM/DD`、`YYYY/YYYY.MM.DD` 这类按年月分文件夹的格式。
-- **启动自动化可选** —— 可以只创建当天笔记，也可以启动时补缺失笔记，或者完全手动执行命令。
+- **支持层级路径** —— 可以识别 `YYYY/MM/DD`、`YYYY/YYYY.MM.DD` 这类按年月分文件夹的格式。
+- **启动自动化可选** _(v0.2.1 修复)_ —— 可以只创建当天笔记，也可以启动时补缺失笔记，或者完全手动执行命令，并避免重复创建已有笔记。
 
 ## 层级 Daily Note 格式
 
@@ -49,7 +49,7 @@ Date format:        YYYY/MM/DD
 
 ## 快速上手
 
-1. 通过 [BRAT](https://github.com/TfTHacker/obsidian42-brat) 安装 Daily Note Plus。
+1. 从 Obsidian 社区插件市场安装 Daily Note Plus。
 2. 启用 Obsidian 的 Daily Notes 核心插件；如果你使用 Periodic Notes，也可以启用对应插件。
 3. 配置 daily note folder 和 format，例如 `YYYY-MM-DD`、`YYYY/YYYY.MM.DD` 或 `YYYY/MM/DD`。
 4. 在命令面板执行 `Create missing daily notes`。
@@ -57,27 +57,39 @@ Date format:        YYYY/MM/DD
 ## 安装
 
 <details open>
-<summary><b>BRAT（推荐）</b></summary>
+<summary><b>社区插件市场（推荐）</b></summary>
 
-在 Daily Note Plus 上架 Obsidian 社区插件目录之前，推荐通过 BRAT 安装。
+Daily Note Plus 已经进入 Obsidian 社区插件目录，因此这是默认推荐安装方式。如果暂时搜索不到，等待 Obsidian 插件列表刷新后再试。
 
-1. 从 Obsidian 社区插件中安装并启用 [BRAT](https://github.com/TfTHacker/obsidian42-brat)。
-2. 打开命令面板，执行 `BRAT: Add a beta plugin for testing`。
-3. 粘贴这个仓库地址：
-
-```text
-https://github.com/o1xhack/obsidian-daily-note-plus
-```
-
-4. 确认安装，让 BRAT 下载最新 release。
-5. 进入 `Settings -> Community plugins`，必要时刷新插件列表，然后启用 `Daily Note Plus`。
-
-Daily Note Plus 当前的 GitHub release 已包含 BRAT 需要的 `main.js`、`manifest.json`、`styles.css`。
+1. 打开 `Settings -> Community plugins`。
+2. 如果 Obsidian 提示，请关闭 Restricted mode。
+3. 点击 `Browse`。
+4. 搜索 `Daily Note Plus`。
+5. 点击 `Install`。
+6. 点击 `Enable`，或者稍后在 `Settings -> Community plugins -> Installed plugins` 里启用 `Daily Note Plus`。
 
 </details>
 
 <details>
-<summary><b>手动安装</b></summary>
+<summary><b>从 BRAT 迁移</b></summary>
+
+如果你之前通过 [BRAT](https://github.com/TfTHacker/obsidian42-brat) 安装 Daily Note Plus，可以按下面步骤切换到社区插件市场更新。
+
+1. 进入 `Settings -> Community plugins -> Installed plugins`。
+2. 先关闭 `Daily Note Plus`。
+3. 进入 `Settings -> BRAT`。
+4. 在 BRAT 的 beta plugin 列表里找到 `o1xhack/obsidian-daily-note-plus`。
+5. 点击旁边的 `x`，然后确认将它从 BRAT 更新列表里移除。
+6. 回到 `Settings -> Community plugins`，点击 `Browse`，搜索 `Daily Note Plus`。
+7. 因为插件 ID 一样，都是 `daily-note-plus`，这里应该会显示为 `Installed`。
+8. 从社区插件页面或已安装插件列表重新启用 `Daily Note Plus`。
+
+从 BRAT 移除仓库只会停止 BRAT 管理更新，不会删除 vault 里的插件文件。之后 Obsidian 会通过正常的社区插件更新流程管理它。
+
+</details>
+
+<details>
+<summary><b>手动安装 release</b></summary>
 
 1. 从 [最新发布版本](https://github.com/o1xhack/obsidian-daily-note-plus/releases/latest) 下载 `main.js`、`manifest.json`、`styles.css`。
 2. 在你的 vault 里创建文件夹：`.obsidian/plugins/daily-note-plus/`
@@ -135,9 +147,9 @@ npm run build
 </details>
 
 <details>
-<summary><b>为什么现在用 BRAT，而不是社区插件市场？</b></summary>
+<summary><b>我之前通过 BRAT 安装，需要卸载插件吗？</b></summary>
 
-Daily Note Plus 目前先通过 GitHub release 分发，准备后续提交到 Obsidian 社区插件目录。BRAT 可以在这个阶段直接从 GitHub 仓库安装和更新插件。
+不需要。你只需要在 BRAT 里移除 `o1xhack/obsidian-daily-note-plus`，让 BRAT 停止管理更新，然后通过 Obsidian 社区插件界面启用同一个已安装插件。只有在你想彻底删除 Daily Note Plus 时，才需要在 Obsidian 里执行 `Uninstall`。
 
 </details>
 
@@ -147,8 +159,9 @@ Daily Note Plus 目前先通过 GitHub release 分发，准备后续提交到 Ob
 - [x] 发布 `0.1.0`。
 - [x] 支持层级 daily note format 的已有笔记识别。
 - [x] 发布 `0.2.0`，修复 Obsidian 社区审核警告。
+- [x] 发布 `0.2.1`，避免启动时重复创建已有 Daily Note。
+- [x] 进入 Obsidian 社区插件目录。
 - [ ] 补充常见日期格式和长时间范围回溯的 vault 内测试。
-- [ ] 准备 Obsidian 社区插件提交。
 
 ## 参与贡献
 

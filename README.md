@@ -15,8 +15,8 @@
 
 - **Backfill any date range** — create missing daily notes for a selected period instead of opening each date by hand.
 - **Respect your Daily Notes setup** — uses your configured folder, format, and template from Daily Notes or Periodic Notes.
-- **Nested paths work** _(new in v0.1.0)_ — detects existing notes with formats such as `YYYY/MM/DD` and `YYYY/YYYY.MM.DD`.
-- **Startup automation stays optional** — create today's note, auto-fill missed notes, or run the command manually.
+- **Nested paths work** — detects existing notes with formats such as `YYYY/MM/DD` and `YYYY/YYYY.MM.DD`.
+- **Startup automation stays optional** _(fixed in v0.2.1)_ — create today's note, auto-fill missed notes, or run the command manually without duplicate creation attempts.
 
 ## Nested Daily Note Formats
 
@@ -49,7 +49,7 @@ If more than seven notes would be created on startup, Daily Note Plus asks for c
 
 ## Quick Start
 
-1. Install Daily Note Plus with [BRAT](https://github.com/TfTHacker/obsidian42-brat).
+1. Install Daily Note Plus from Obsidian's Community plugins browser.
 2. Enable Obsidian's Daily Notes core plugin, or enable Periodic Notes if you use that workflow.
 3. Configure your daily note folder and format, such as `YYYY-MM-DD`, `YYYY/YYYY.MM.DD`, or `YYYY/MM/DD`.
 4. Run `Create missing daily notes` from the command palette.
@@ -57,27 +57,39 @@ If more than seven notes would be created on startup, Daily Note Plus asks for c
 ## Install
 
 <details open>
-<summary><b>BRAT (recommended)</b></summary>
+<summary><b>Community plugins (recommended)</b></summary>
 
-BRAT is the recommended install method while Daily Note Plus is not yet listed in the Obsidian community plugin directory.
+This is the default install method now that Daily Note Plus has been accepted into the Obsidian community plugin directory. If it does not appear immediately, wait for Obsidian's plugin list to refresh and try again.
 
-1. Install and enable [BRAT](https://github.com/TfTHacker/obsidian42-brat) from Obsidian's community plugins.
-2. Open the command palette and run `BRAT: Add a beta plugin for testing`.
-3. Paste this repository URL:
-
-```text
-https://github.com/o1xhack/obsidian-daily-note-plus
-```
-
-4. Confirm the prompt and let BRAT download the latest release.
-5. Go to `Settings -> Community plugins`, refresh the plugin list if needed, and enable `Daily Note Plus`.
-
-Daily Note Plus currently publishes GitHub releases with the files BRAT expects: `main.js`, `manifest.json`, and `styles.css`.
+1. Open `Settings -> Community plugins`.
+2. Turn off Restricted mode if Obsidian asks you to.
+3. Select `Browse`.
+4. Search for `Daily Note Plus`.
+5. Select `Install`.
+6. Select `Enable`, or enable `Daily Note Plus` later from `Settings -> Community plugins -> Installed plugins`.
 
 </details>
 
 <details>
-<summary><b>Manual</b></summary>
+<summary><b>Migrate from BRAT</b></summary>
+
+Use this if you installed Daily Note Plus through [BRAT](https://github.com/TfTHacker/obsidian42-brat) before the community plugin listing was available.
+
+1. Go to `Settings -> Community plugins -> Installed plugins`.
+2. Disable `Daily Note Plus`.
+3. Go to `Settings -> BRAT`.
+4. Find `o1xhack/obsidian-daily-note-plus` in BRAT's beta plugin list.
+5. Click the `x` button next to it, then confirm the removal from BRAT updates.
+6. Return to `Settings -> Community plugins`, select `Browse`, and search for `Daily Note Plus`.
+7. The plugin should show as `Installed` because it uses the same plugin ID, `daily-note-plus`.
+8. Enable `Daily Note Plus` again from the community plugin page or the installed plugins list.
+
+Removing the repository from BRAT stops BRAT from managing updates. It does not delete the installed plugin files from your vault; Obsidian can then manage updates through its normal community plugin update flow.
+
+</details>
+
+<details>
+<summary><b>Manual release install</b></summary>
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/o1xhack/obsidian-daily-note-plus/releases/latest).
 2. Create this folder in your vault: `.obsidian/plugins/daily-note-plus/`
@@ -135,9 +147,9 @@ Not yet. Daily Note Plus intentionally uses strict parsing, so `2025-05-12 Beach
 </details>
 
 <details>
-<summary><b>Why BRAT instead of the community plugin directory?</b></summary>
+<summary><b>I installed with BRAT. Do I need to uninstall the plugin?</b></summary>
 
-Daily Note Plus is currently distributed through GitHub releases while it is prepared for Obsidian community plugin submission. BRAT can install and update plugins directly from GitHub repositories during that phase.
+No. Remove `o1xhack/obsidian-daily-note-plus` from BRAT's beta plugin list so BRAT stops managing updates, then enable the same installed plugin through Obsidian's community plugin UI. Only use Obsidian's `Uninstall` action if you want to remove Daily Note Plus from the vault completely.
 
 </details>
 
@@ -147,8 +159,9 @@ Daily Note Plus is currently distributed through GitHub releases while it is pre
 - [x] Publish release `0.1.0`.
 - [x] Support existing-note detection for nested daily note formats.
 - [x] Publish release `0.2.0` for Obsidian community review warnings.
+- [x] Publish release `0.2.1` to prevent duplicate startup creation attempts.
+- [x] Accepted into the Obsidian community plugin directory.
 - [ ] Add broader in-vault test coverage for common date formats and long backfill ranges.
-- [ ] Prepare Obsidian community plugin submission.
 
 ## Contributing
 
