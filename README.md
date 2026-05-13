@@ -105,8 +105,8 @@ Copy `main.js`, `manifest.json`, and `styles.css` into `.obsidian/plugins/daily-
 
 | Setting | Default | Description |
 |---|---|---|
-| `Create daily note on startup` | On | Creates today's daily note when the vault opens. |
-| `Auto-create missed daily notes on startup` | Off | Backfills missed notes since the latest existing daily note. |
+| `Create daily note on startup` | On | Creates today's daily note when the vault opens, but skips creation if today's note already exists. |
+| `Auto-create missed daily notes on startup` | Off | Also backfills missing notes between the latest existing daily note and today. |
 | Daily Notes `folder` | Your Obsidian setting | The root folder used when detecting and creating daily notes. |
 | Daily Notes `format` | Your Obsidian setting | The full Moment date format, including folder segments like `YYYY/MM/DD`. |
 | Daily Notes `template` | Your Obsidian setting | The template used by Obsidian's Daily Notes or Periodic Notes setup. |

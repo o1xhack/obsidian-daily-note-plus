@@ -105,8 +105,8 @@ npm run build
 
 | 选项 | 默认值 | 说明 |
 |---|---|---|
-| `Create daily note on startup` | 开启 | 打开 vault 时创建当天 Daily Note。 |
-| `Auto-create missed daily notes on startup` | 关闭 | 启动时从最后一篇已有 Daily Note 开始补齐缺失日期。 |
+| `Create daily note on startup` | 开启 | 打开 vault 时创建当天 Daily Note；如果当天笔记已存在，则不会重复创建。 |
+| `Auto-create missed daily notes on startup` | 关闭 | 启动时额外补齐最后一篇已有 Daily Note 到今天之间缺失的日期。 |
 | Daily Notes `folder` | 你的 Obsidian 设置 | 用于识别和创建 Daily Notes 的根目录。 |
 | Daily Notes `format` | 你的 Obsidian 设置 | 完整 Moment 日期格式，可以包含 `YYYY/MM/DD` 这样的文件夹层级。 |
 | Daily Notes `template` | 你的 Obsidian 设置 | 创建 Daily Note 时使用的模板。 |

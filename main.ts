@@ -68,6 +68,10 @@ function getDailyNote(date: Moment, dailyNotes: Record<string, TFile>): TFile | 
 	return dailyNotes[getDateUID(date)] ?? null;
 }
 
+function getNextDate(date: Moment): Moment {
+	return date.clone().add(1, `day`);
+}
+
 // Find the date of the first and last daily notes that exist in the vault
 function getFirstAndLastDates(dailyNotes: Record<string, TFile>): { first: Moment | null; last: Moment | null } {
 	const sortedDailyNotes = Object.entries(dailyNotes).sort();
@@ -225,12 +229,13 @@ export default class DailyNoteCreator extends Plugin {
 				return;
 			}
 			if (this.settings.autoCreateCurrentDaily) {
+				const dailyNotes = getAllDailyNotes(this.app);
+				const today = moment();
 				if (this.settings.autoCreateMissedDailies) {
-					// Create missed daily notes
-					const dailyNotes = getAllDailyNotes(this.app);
+					// Create missed daily notes after the latest existing daily.
 					const { last } = getFirstAndLastDates(dailyNotes);
-					const today = moment();
-					const missing = findMissingDates(dailyNotes, last ?? today, today);
+					const startDate = last ? getNextDate(last) : today;
+					const missing = findMissingDates(dailyNotes, startDate, today);
 					// Ask for confirmation after one week
 					if (missing.length <= 7) {
 						await createDailyNotes(missing);
@@ -238,8 +243,10 @@ export default class DailyNoteCreator extends Plugin {
 						new DailyNoteCreatorModal(this.app, dailyNotes, last ?? today, today).open();
 					}
 				} else {
-					// Only create today's daily note
-					await createDailyNote(moment());
+					// Only create today's daily note when it does not already exist.
+					if (!getDailyNote(today, dailyNotes)) {
+						await createDailyNote(today);
+					}
 				}
 			}
 		});
@@ -313,7 +320,7 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 		if (this.plugin.settings.autoCreateCurrentDaily) {
 			new Setting(containerEl)
 				.setName(`Auto-create missed daily notes on startup`)
-				.setDesc(`Since last daily (` + (last ? last.format(dateFormat) : `never`) + `)`)
+				.setDesc(`Create missing notes between the latest existing daily (` + (last ? last.format(dateFormat) : `never`) + `) and today.`)
 				.addToggle(toggle => toggle
 					.setValue(this.plugin.settings.autoCreateMissedDailies)
 					.onChange(async () => {
