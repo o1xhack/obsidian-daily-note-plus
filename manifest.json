@@ -1,11 +1,10 @@
 {
-	"id": "daily-note-creator",
-	"name": "Daily note creator",
+	"id": "daily-note-plus",
+	"name": "Daily Note Plus",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Automatically creates missing daily notes",
-	"author": "Mario Holubar",
-	"authorUrl": "https://github.com/mario-holubar",
-	"fundingUrl": "https://ko-fi.com/mario_holubar",
+	"author": "o1xhack",
+	"authorUrl": "https://github.com/o1xhack",
 	"isDesktopOnly": false
 }

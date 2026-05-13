@@ -1,10 +1,12 @@
-# Daily note creator
+# Daily Note Plus
 
 Do you want [Obsidian](https://obsidian.md/) to create your [daily notes](https://help.obsidian.md/Plugins/Daily+notes) automatically, without opening the daily note on startup, and including days that you haven't opened the vault? Then this is the plugin for you!
 
 It acts as an alternative to [Auto Journal](https://github.com/Ebonsignori/obsidian-auto-journal). Auto Journal also has backfill functionality and comes with more features such as monthly notes, but also enforces a certain folder structure.
 
-Daily note creator is designed to be an add-on to the daily notes core plugin, rather than a replacement, and will use the settings you defined there to create missing notes.
+Daily Note Plus is designed to be an add-on to the daily notes core plugin, rather than a replacement, and will use the settings you defined there to create missing notes.
+
+Daily Note Plus is derived from Mario Holubar's [Daily note creator](https://github.com/mario-holubar/obsidian-daily-note-creator), licensed under the MIT License.
 
 ## Features
 

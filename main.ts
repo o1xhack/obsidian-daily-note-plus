@@ -161,7 +161,7 @@ export default class DailyNoteCreator extends Plugin {
 		// Create daily notes on startup
 		this.app.workspace.onLayoutReady(async () => {
 			if (!appHasDailyNotesPluginLoaded()) {
-				new Notice(`Daily Note Creator: Daily notes are disabled`);
+				new Notice(`Daily Note Plus: Daily notes are disabled`);
 				return;
 			}
 			if (this.settings.autoCreateCurrentDaily) {
