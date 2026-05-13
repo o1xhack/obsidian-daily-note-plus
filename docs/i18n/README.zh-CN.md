@@ -146,6 +146,7 @@ Daily Note Plus 目前先通过 GitHub release 分发，准备后续提交到 Ob
 - [x] 将插件重命名为 Daily Note Plus，插件 ID 为 `daily-note-plus`。
 - [x] 发布 `0.1.0`。
 - [x] 支持层级 daily note format 的已有笔记识别。
+- [x] 发布 `0.2.0`，修复 Obsidian 社区审核警告。
 - [ ] 补充常见日期格式和长时间范围回溯的 vault 内测试。
 - [ ] 准备 Obsidian 社区插件提交。
 

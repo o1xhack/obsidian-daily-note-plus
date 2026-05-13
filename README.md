@@ -146,6 +146,7 @@ Daily Note Plus is currently distributed through GitHub releases while it is pre
 - [x] Rename the plugin to Daily Note Plus with plugin ID `daily-note-plus`.
 - [x] Publish release `0.1.0`.
 - [x] Support existing-note detection for nested daily note formats.
+- [x] Publish release `0.2.0` for Obsidian community review warnings.
 - [ ] Add broader in-vault test coverage for common date formats and long backfill ranges.
 - [ ] Prepare Obsidian community plugin submission.
 
