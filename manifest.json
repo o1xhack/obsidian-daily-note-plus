@@ -3,7 +3,7 @@
 	"name": "Daily Note Plus",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Automatically creates missing daily notes",
+	"description": "Automatically creates missing daily notes.",
 	"author": "o1xhack",
 	"authorUrl": "https://github.com/o1xhack",
 	"isDesktopOnly": false

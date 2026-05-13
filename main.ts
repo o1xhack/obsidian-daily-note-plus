@@ -1,4 +1,6 @@
-import { App, Modal, moment, normalizePath, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { Modal, moment, normalizePath, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import type { App, TFile } from 'obsidian';
+import type { Moment } from 'moment';
 import { appHasDailyNotesPluginLoaded, getDailyNoteSettings, createDailyNote } from "obsidian-daily-notes-interface";
 
 interface DailyNoteCreatorSettings {
@@ -11,15 +13,17 @@ const DEFAULT_SETTINGS: DailyNoteCreatorSettings = {
 	autoCreateMissedDailies: false,
 }
 
-function getDateUID(date: moment.Moment) {
+const DEFAULT_DAILY_NOTE_FORMAT = `YYYY-MM-DD`;
+
+function getDateUID(date: Moment): string {
 	return `day-${date.clone().startOf(`day`).format()}`;
 }
 
-function stripMarkdownExtension(path: string) {
+function stripMarkdownExtension(path: string): string {
 	return path.endsWith(`.md`) ? path.slice(0, -3) : path;
 }
 
-function getDailyNoteRelativePath(file: TFile, folder?: string) {
+function getDailyNoteRelativePath(file: TFile, folder?: string): string | null {
 	const normalizedFilePath = stripMarkdownExtension(normalizePath(file.path));
 	const trimmedFolder = (folder ?? ``).trim();
 	const normalizedFolder = trimmedFolder ? normalizePath(trimmedFolder).replace(/\/+$/, ``) : ``;
@@ -36,18 +40,18 @@ function getDailyNoteRelativePath(file: TFile, folder?: string) {
 	return normalizedFilePath.slice(folderPrefix.length);
 }
 
-function getDateFromDailyNotePath(file: TFile) {
+function getDateFromDailyNotePath(file: TFile): Moment | null {
 	const { folder, format } = getDailyNoteSettings();
 	const relativePath = getDailyNoteRelativePath(file, folder);
 	if (!relativePath) {
 		return null;
 	}
 
-	const noteDate = moment(relativePath, format ?? `YYYY-MM-DD`, true);
+	const noteDate = moment(relativePath, format ?? DEFAULT_DAILY_NOTE_FORMAT, true);
 	return noteDate.isValid() ? noteDate : null;
 }
 
-function getAllDailyNotes(app: App) {
+function getAllDailyNotes(app: App): Record<string, TFile> {
 	const dailyNotes: Record<string, TFile> = {};
 
 	for (const file of app.vault.getMarkdownFiles()) {
@@ -60,12 +64,12 @@ function getAllDailyNotes(app: App) {
 	return dailyNotes;
 }
 
-function getDailyNote(date: moment.Moment, dailyNotes: Record<string, TFile>) {
+function getDailyNote(date: Moment, dailyNotes: Record<string, TFile>): TFile | null {
 	return dailyNotes[getDateUID(date)] ?? null;
 }
 
 // Find the date of the first and last daily notes that exist in the vault
-function getFirstAndLastDates(dailyNotes: Record<string, TFile>) {
+function getFirstAndLastDates(dailyNotes: Record<string, TFile>): { first: Moment | null; last: Moment | null } {
 	const sortedDailyNotes = Object.entries(dailyNotes).sort();
 
 	// Fall back to today's date if there are no daily notes
@@ -82,9 +86,9 @@ function getFirstAndLastDates(dailyNotes: Record<string, TFile>) {
 }
 
 // Find all dates for which daily notes are missing between start and end date
-function findMissingDates(dailyNotes: Record<string, TFile>, start: moment.Moment, end: moment.Moment) {
-	let missingDates = [];
-	let currentDate = start.clone();
+function findMissingDates(dailyNotes: Record<string, TFile>, start: Moment, end: Moment): Moment[] {
+	const missingDates: Moment[] = [];
+	const currentDate = start.clone();
 	while (currentDate.isSameOrBefore(end)) {
 		if (!getDailyNote(currentDate, dailyNotes)) {
 			missingDates.push(currentDate.clone());
@@ -95,7 +99,7 @@ function findMissingDates(dailyNotes: Record<string, TFile>, start: moment.Momen
 }
 
 // Create daily notes
-async function createDailyNotes(dates: moment.Moment[]) {
+async function createDailyNotes(dates: Moment[]): Promise<void> {
 	await Promise.all(dates.map(async date => {
 		await createDailyNote(date);
 	}));
@@ -107,12 +111,12 @@ async function createDailyNotes(dates: moment.Moment[]) {
 // Modal dialog for creating missing daily notes
 class DailyNoteCreatorModal extends Modal {
 	dailyNotes: Record<string, TFile>;
-	startDate: moment.Moment;
-	endDate: moment.Moment;
-	missingDates: moment.Moment[];
+	startDate: Moment;
+	endDate: Moment;
+	missingDates: Moment[];
 	onConfirm: (() => void) | undefined;
 
-	constructor(app: App, dailyNotes: Record<string, TFile>, startDate: moment.Moment, endDate: moment.Moment, onConfirm?: (() => void) | undefined) {
+	constructor(app: App, dailyNotes: Record<string, TFile>, startDate: Moment, endDate: Moment, onConfirm?: () => void) {
 		super(app);
 		this.dailyNotes = dailyNotes;
 		this.startDate = startDate;
@@ -121,12 +125,12 @@ class DailyNoteCreatorModal extends Modal {
 		this.onConfirm = onConfirm;
 	}
 
-	onOpen() {
-		let { titleEl, contentEl } = this;
+	onOpen(): void {
+		const { titleEl, contentEl } = this;
 		titleEl.setText('Create missing daily notes');
 
 		// Create input fields for start and end date
-		let startDateInput = new Setting(contentEl)
+		const startDateInput = new Setting(contentEl)
 			.setName('Start date')
 		startDateInput.controlEl.createEl('input', {
 			attr: { type: 'date' },
@@ -135,7 +139,7 @@ class DailyNoteCreatorModal extends Modal {
 			this.startDate = moment((event.target as HTMLInputElement).value);
 			update();
 		});
-		let endDateInput = new Setting(contentEl)
+		const endDateInput = new Setting(contentEl)
 			.setName('End date')
 		endDateInput.controlEl.createEl('input', {
 			attr: { type: 'date' },
@@ -146,14 +150,16 @@ class DailyNoteCreatorModal extends Modal {
 		});
 
 		// Create confirmation buttons
-		let confirmation = new Setting(contentEl)
+		const confirmation = new Setting(contentEl)
 			.addButton(confirm => confirm
 				.setButtonText(`Confirm`)
 				.setCta()
 				.onClick(async () => {
 					this.close();
 					await createDailyNotes(this.missingDates);
-					this.onConfirm && this.onConfirm();
+					if (this.onConfirm) {
+						this.onConfirm();
+					}
 				}))
 			.addButton(cancel => cancel
 				.setButtonText(`Cancel`)
@@ -162,12 +168,13 @@ class DailyNoteCreatorModal extends Modal {
 				}));
 
 		// Find missing dates and update labels
-		let update = () => {
-			let { format } = getDailyNoteSettings();
+		const update = (): void => {
+			const { format } = getDailyNoteSettings();
+			const dateFormat = format ?? DEFAULT_DAILY_NOTE_FORMAT;
 			const startDateValid = this.startDate.isValid() && this.startDate.year().toString().length === 4;
 			const endDateValid = this.endDate.isValid() && this.endDate.year().toString().length === 4;
-			startDateInput.setDesc(startDateValid ? this.startDate.format(format) : `Invalid date`);
-			endDateInput.setDesc(endDateValid ? this.endDate.format(format) : `Invalid date`);
+			startDateInput.setDesc(startDateValid ? this.startDate.format(dateFormat) : `Invalid date`);
+			endDateInput.setDesc(endDateValid ? this.endDate.format(dateFormat) : `Invalid date`);
 			if (startDateValid && endDateValid) {
 				this.missingDates = findMissingDates(this.dailyNotes, this.startDate, this.endDate);
 			} else {
@@ -179,8 +186,8 @@ class DailyNoteCreatorModal extends Modal {
 		update();
 	}
 
-	onClose() {
-		let { contentEl } = this;
+	onClose(): void {
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }
@@ -188,7 +195,7 @@ class DailyNoteCreatorModal extends Modal {
 export default class DailyNoteCreator extends Plugin {
 	settings: DailyNoteCreatorSettings;
 
-	async onload() {
+	async onload(): Promise<void> {
 		// Load settings
 		await this.loadSettings();
 
@@ -232,20 +239,21 @@ export default class DailyNoteCreator extends Plugin {
 					}
 				} else {
 					// Only create today's daily note
-					createDailyNote(moment());
+					await createDailyNote(moment());
 				}
 			}
 		});
 	}
 
-	onunload() {
+	onunload(): void {
 	}
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+	async loadSettings(): Promise<void> {
+		const loadedSettings = await this.loadData() as Partial<DailyNoteCreatorSettings> | null;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedSettings);
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
 }
@@ -263,7 +271,7 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		if (!appHasDailyNotesPluginLoaded()) {
-			containerEl.createEl(`body`, { text: `Enable daily notes to use this plugin.` });
+			containerEl.createEl(`p`, { text: `Enable daily notes to use this plugin.` });
 			return;
 		}
 
@@ -275,10 +283,11 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 		const n = missing.length;
 
 		// Create backfill button
-		let { format } = getDailyNoteSettings();
+		const { format } = getDailyNoteSettings();
+		const dateFormat = format ?? DEFAULT_DAILY_NOTE_FORMAT;
 		new Setting(containerEl)
 			.setName(n.toString() + ` missing daily note` + (n == 1 ? `` : `s`))
-			.setDesc(`Since first daily (` + (first ? first.format(format) : `never`) + `)`)
+			.setDesc(`Since first daily (` + (first ? first.format(dateFormat) : `never`) + `)`)
 			.addButton(toggle => toggle
 				.setButtonText(`Create missing daily notes...`)
 				.setCta()
@@ -304,7 +313,7 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 		if (this.plugin.settings.autoCreateCurrentDaily) {
 			new Setting(containerEl)
 				.setName(`Auto-create missed daily notes on startup`)
-				.setDesc(`Since last daily (` + (last ? last.format(format) : `never`) + `)`)
+				.setDesc(`Since last daily (` + (last ? last.format(dateFormat) : `never`) + `)`)
 				.addToggle(toggle => toggle
 					.setValue(this.plugin.settings.autoCreateMissedDailies)
 					.onChange(async () => {
