@@ -1,6 +1,5 @@
 import { Modal, moment, normalizePath, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import type { App, ButtonComponent, TFile } from 'obsidian';
-import type { Moment } from 'moment';
 import { appHasDailyNotesPluginLoaded, getDailyNoteSettings, createDailyNote } from "obsidian-daily-notes-interface";
 import {
 	countDatesInRange,
@@ -9,6 +8,8 @@ import {
 	normalizeBackfillRange,
 } from './date-range';
 import type { DateRangePreset } from './date-range';
+
+type Moment = ReturnType<typeof moment>;
 
 interface DailyNoteCreatorSettings {
 	autoCreateCurrentDaily: boolean;

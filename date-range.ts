@@ -1,4 +1,6 @@
-import type { Moment } from 'moment';
+import type { moment } from 'obsidian';
+
+export type Moment = ReturnType<typeof moment>;
 
 export const MAX_BACKFILL_RANGE_DAYS = 3650;
 
