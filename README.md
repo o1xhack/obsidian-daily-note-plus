@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/github/license/o1xhack/obsidian-daily-note-plus?color=7c3aed)](LICENSE)
 [![Obsidian version](https://img.shields.io/badge/Obsidian-0.15.0%2B-7c3aed)](https://obsidian.md)
 
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/o1xhack)
+
 **Create missing Obsidian daily notes without opening each day, including backfilled ranges that use nested folder formats.**
 
 > English · [简体中文](docs/i18n/README.zh-CN.md)

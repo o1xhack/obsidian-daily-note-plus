@@ -5,6 +5,8 @@
 [![许可证](https://img.shields.io/github/license/o1xhack/obsidian-daily-note-plus?color=7c3aed)](../../LICENSE)
 [![Obsidian 版本](https://img.shields.io/badge/Obsidian-0.15.0%2B-7c3aed)](https://obsidian.md)
 
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/o1xhack)
+
 **为 Obsidian 自动补齐缺失的 Daily Notes，不需要逐天打开，并支持带文件夹层级的日期格式。**
 
 > [English](../../README.md) · 简体中文
