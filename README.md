@@ -18,7 +18,8 @@
 - **Backfill any date range** — create missing daily notes for a selected period instead of opening each date by hand.
 - **Respect your Daily Notes setup** — uses your configured folder, format, and template from Daily Notes or Periodic Notes.
 - **Nested paths work** — detects existing notes with formats such as `YYYY/MM/DD` and `YYYY/YYYY.MM.DD`.
-- **Startup automation stays optional** _(fixed in v0.2.1)_ — create today's note, auto-fill missed notes, or run the command manually without duplicate creation attempts.
+- **Startup automation stays optional** _(fixed in v0.2.1)_ — create today's note when the vault opens without duplicate creation attempts.
+- **Desktop daily scheduling** — create today's note at a configurable local time even when Obsidian stays open across multiple days.
 - **Safer backfill modal** _(new in v0.3.0)_ — use quick date presets, live range stats, and disabled confirmation for invalid or empty work.
 
 ## Nested Daily Note Formats
@@ -44,7 +45,7 @@ Existing: 2025/12/28.md, 2026/01/01.md
 Creates:  2025/12/29.md, 2025/12/30.md, 2025/12/31.md, 2026/01/02.md, 2026/01/03.md
 ```
 
-If more than seven notes would be created on startup, Daily Note Plus asks for confirmation before continuing.
+If more than seven older notes would be backfilled automatically, Daily Note Plus creates today's note first and asks for confirmation before creating the older dates.
 
 The backfill modal includes quick presets for the last 7 days, last 30 days, this month, and last month. Presets only fill the date inputs; no files are created until you select `Start backfill`. The modal also shows the inclusive range length and how many daily notes already exist in that range.
 
@@ -125,7 +126,9 @@ Copy `main.js`, `manifest.json`, and `styles.css` into `.obsidian/plugins/daily-
 | Setting | Default | Description |
 |---|---|---|
 | `Create daily note on startup` | On | Creates today's daily note when the vault opens, but skips creation if today's note already exists. |
-| `Auto-create missed daily notes on startup` | Off | Also backfills missing notes between the latest existing daily note and today. |
+| `Create daily note on schedule` | On | On desktop only, checks for today's note at or after the configured local time. Existing users inherit their startup preference when this setting is introduced. |
+| `Daily creation time` | `00:00` | Local computer time for scheduled creation. If the computer was asleep, the check runs after it resumes. |
+| `Auto-create missed daily notes` | Off | During startup or a scheduled run, also backfills missing notes between the latest existing daily note and yesterday. |
 | Daily Notes `folder` | Your Obsidian setting | The root folder used when detecting and creating daily notes. |
 | Daily Notes `format` | Your Obsidian setting | The full Moment date format, including folder segments like `YYYY/MM/DD`. |
 | Daily Notes `template` | Your Obsidian setting | The template used by Obsidian's Daily Notes or Periodic Notes setup. |
@@ -143,6 +146,15 @@ Yes. Daily Note Plus detects existing notes by parsing the full path relative to
 <summary><b>Will it duplicate notes that already exist?</b></summary>
 
 It should not duplicate notes that strictly match your configured daily note format. It builds a date index before creating missing notes, then skips dates already present in that index.
+
+Startup, scheduled, and manual backfill creation share the same serialized creation queue. Each queued operation scans the vault again before creating a file, so overlapping triggers still create at most one note for a given date.
+
+</details>
+
+<details>
+<summary><b>Does scheduled creation run on mobile?</b></summary>
+
+No. The scheduled trigger is registered only in the Electron desktop app. Startup creation and the manual backfill command remain available on mobile.
 
 </details>
 
@@ -169,6 +181,7 @@ No. Remove `o1xhack/obsidian-daily-note-plus` from BRAT's beta plugin list so BR
 - [x] Publish release `0.2.1` to prevent duplicate startup creation attempts.
 - [x] Accepted into the Obsidian community plugin directory.
 - [x] Publish release `0.3.0` with quick date presets, live range stats, input validation, and tests.
+- [x] Publish release `0.4.0` with desktop-only daily scheduled creation, local-time scheduling, and sleep-resume handling.
 - [ ] Add broader in-vault test coverage for common date formats and long backfill ranges.
 
 ## Contributing

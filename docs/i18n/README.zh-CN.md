@@ -18,7 +18,8 @@
 - **补齐任意日期范围** —— 不用手动打开每一天，可以一次性创建一段时间内缺失的 Daily Notes。
 - **尊重你的 Daily Notes 配置** —— 读取 Daily Notes 或 Periodic Notes 里的 folder、format、template。
 - **支持层级路径** —— 可以识别 `YYYY/MM/DD`、`YYYY/YYYY.MM.DD` 这类按年月分文件夹的格式。
-- **启动自动化可选** _(v0.2.1 修复)_ —— 可以只创建当天笔记，也可以启动时补缺失笔记，或者完全手动执行命令，并避免重复创建已有笔记。
+- **启动自动化可选** _(v0.2.1 修复)_ —— 打开 vault 时创建当天笔记，并避免重复创建。
+- **桌面端每日定时创建** —— 即使 Obsidian 连续多天不关闭，也能按用户本地时间自动创建当天笔记。
 - **更安全的回溯弹窗** _(v0.3.0 新增)_ —— 支持快捷日期、实时统计、非法区间禁用确认按钮，降低误操作风险。
 
 ## 层级 Daily Note 格式
@@ -44,7 +45,7 @@ Date format:        YYYY/MM/DD
 创建:  2025/12/29.md, 2025/12/30.md, 2025/12/31.md, 2026/01/02.md, 2026/01/03.md
 ```
 
-如果启动时需要创建超过 7 篇笔记，Daily Note Plus 会先弹窗确认。
+如果自动补建的历史笔记超过 7 篇，Daily Note Plus 会先创建今天的笔记，再要求你确认是否继续创建更早的日期。
 
 回溯弹窗提供最近 7 天、最近 30 天、本月、上月这几个快捷选项。快捷按钮只会填写日期，不会直接创建文件；只有点击 `Start backfill` 才会执行。弹窗也会实时显示区间天数，以及这个区间里已经存在多少篇 Daily Note。
 
@@ -125,7 +126,9 @@ npm run build
 | 选项 | 默认值 | 说明 |
 |---|---|---|
 | `Create daily note on startup` | 开启 | 打开 vault 时创建当天 Daily Note；如果当天笔记已存在，则不会重复创建。 |
-| `Auto-create missed daily notes on startup` | 关闭 | 启动时额外补齐最后一篇已有 Daily Note 到今天之间缺失的日期。 |
+| `Create daily note on schedule` | 开启 | 仅在电脑端生效；到达设定的本地时间后检查并创建当天笔记。已有用户升级时会继承原来的 startup 开关偏好。 |
+| `Daily creation time` | `00:00` | 定时创建使用的电脑本地时间；如果电脑当时处于休眠，会在恢复后补触发。 |
+| `Auto-create missed daily notes` | 关闭 | startup 或定时触发时，额外补齐最后一篇已有 Daily Note 到昨天之间缺失的日期。 |
 | Daily Notes `folder` | 你的 Obsidian 设置 | 用于识别和创建 Daily Notes 的根目录。 |
 | Daily Notes `format` | 你的 Obsidian 设置 | 完整 Moment 日期格式，可以包含 `YYYY/MM/DD` 这样的文件夹层级。 |
 | Daily Notes `template` | 你的 Obsidian 设置 | 创建 Daily Note 时使用的模板。 |
@@ -143,6 +146,15 @@ npm run build
 <summary><b>会重复创建已经存在的笔记吗？</b></summary>
 
 只要已有笔记严格匹配你配置的 daily note format，就不会重复创建。插件会先建立已有日期索引，再只创建缺失日期。
+
+startup、定时触发和手动回溯共用同一个串行创建队列。每个排队任务在真正创建前都会重新扫描 vault，因此多个触发机制重叠时，同一个日期仍然最多只会创建一篇笔记。
+
+</details>
+
+<details>
+<summary><b>手机端会执行定时创建吗？</b></summary>
+
+不会。定时触发器只会在 Electron 电脑端注册；手机端仍然可以使用 startup 创建和手动回溯命令。
 
 </details>
 
@@ -169,6 +181,7 @@ npm run build
 - [x] 发布 `0.2.1`，避免启动时重复创建已有 Daily Note。
 - [x] 进入 Obsidian 社区插件目录。
 - [x] 发布 `0.3.0`，支持快捷日期、实时区间统计、输入校验，并加入测试。
+- [x] 发布 `0.4.0`，支持按本地时间在电脑端每日定时创建，并处理休眠恢复后的补触发。
 - [ ] 补充常见日期格式和长时间范围回溯的 vault 内测试。
 
 ## 参与贡献

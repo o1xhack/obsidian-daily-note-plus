@@ -1,12 +1,12 @@
 {
 	"name": "daily-note-plus",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "Automatically creates missing daily notes.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"test": "tsx --test tests/date-range.test.ts",
+		"test": "tsx --test tests/date-range.test.ts tests/daily-schedule.test.ts",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [],
