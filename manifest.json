@@ -1,7 +1,7 @@
 {
 	"id": "daily-note-plus",
 	"name": "Daily Note Plus",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"minAppVersion": "0.15.0",
 	"description": "Automatically creates missing daily notes.",
 	"author": "o1xhack",
