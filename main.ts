@@ -1,5 +1,6 @@
 import { Modal, moment, normalizePath, Notice, Platform, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import type { App, ButtonComponent, TFile } from 'obsidian';
+import type { Moment } from 'moment';
 import { appHasDailyNotesPluginLoaded, getDailyNoteSettings, createDailyNote } from "obsidian-daily-notes-interface";
 import {
 	DEFAULT_DAILY_CREATION_TIME,
@@ -16,8 +17,6 @@ import {
 	normalizeBackfillRange,
 } from './date-range';
 import type { DateRangePreset } from './date-range';
-
-type Moment = ReturnType<typeof moment>;
 
 interface DailyNoteCreatorSettings {
 	autoCreateCurrentDaily: boolean;
@@ -209,18 +208,18 @@ class DailyNoteCreatorModal extends Modal {
 		const confirmation = new Setting(contentEl)
 			.addButton(confirm => {
 				confirmButton = confirm;
-					confirm
-						.setButtonText(`Start backfill`)
-						.setCta()
-						.setDisabled(true)
-						.onClick(async () => {
-							this.close();
-							await this.onCreate(this.missingDates);
-							if (this.onConfirm) {
-								this.onConfirm();
-							}
-						});
-				})
+				confirm.buttonEl.disabled = true;
+				confirm
+					.setButtonText(`Start backfill`)
+					.setCta()
+					.onClick(async () => {
+						this.close();
+						await this.onCreate(this.missingDates);
+						if (this.onConfirm) {
+							this.onConfirm();
+						}
+					});
+			})
 			.addButton(cancel => cancel
 				.setButtonText(`Cancel`)
 				.onClick(() => {
@@ -252,7 +251,9 @@ class DailyNoteCreatorModal extends Modal {
 					.setDesc('Existing daily notes: 0');
 			}
 			confirmation.setName(`Create ${this.missingDates.length} missing daily note` + (this.missingDates.length == 1 ? `?` : `s?`));
-			confirmButton?.setDisabled(!normalizedRange.isValid || this.missingDates.length === 0);
+			if (confirmButton) {
+				confirmButton.buttonEl.disabled = !normalizedRange.isValid || this.missingDates.length === 0;
+			}
 		}
 
 		update();
@@ -385,7 +386,7 @@ export default class DailyNoteCreator extends Plugin {
 			return;
 		}
 		if (!appHasDailyNotesPluginLoaded()) {
-			new Notice(`Daily Note Plus: Daily notes are disabled`);
+			new Notice(`Daily notes are disabled`);
 			return;
 		}
 
@@ -517,6 +518,10 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		this.render();
+	}
+
+	private render(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 
@@ -548,7 +553,7 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 						first ?? today,
 						today,
 						dates => this.plugin.createDailyNotes(dates),
-						() => this.display(),
+						() => this.render(),
 					).open();
 				})
 			);
@@ -561,23 +566,24 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 				.onChange(async (value) => {
 					this.plugin.settings.autoCreateCurrentDaily = value;
 					await this.plugin.saveSettings();
-					this.display();
+					this.render();
 				})
 			);
 
-		new Setting(containerEl)
+		const scheduledCreationSetting = new Setting(containerEl)
 			.setName(`Create daily note on schedule`)
-			.setDesc(`Desktop only. Uses your computer's local time and catches up after sleep.`)
-			.addToggle(toggle => toggle
+			.setDesc(`Desktop only. Uses your computer's local time and catches up after sleep.`);
+		if (Platform.isDesktopApp) {
+			scheduledCreationSetting.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.autoCreateDailyOnSchedule)
-				.setDisabled(!Platform.isDesktopApp)
 				.onChange(async (value) => {
-					this.plugin.settings.autoCreateDailyOnSchedule = value;
-					await this.plugin.saveSettings();
-					this.plugin.refreshScheduledCreation();
-					this.display();
-				})
+						this.plugin.settings.autoCreateDailyOnSchedule = value;
+						await this.plugin.saveSettings();
+						this.plugin.refreshScheduledCreation();
+						this.render();
+					})
 			);
+		}
 
 		new Setting(containerEl)
 			.setName(`Daily creation time`)
@@ -585,9 +591,9 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 			.addText(text => {
 				text.inputEl.type = `time`;
 				text.inputEl.step = `60`;
+				text.inputEl.disabled = !Platform.isDesktopApp || !this.plugin.settings.autoCreateDailyOnSchedule;
 				text
 					.setValue(this.plugin.settings.dailyCreationTime)
-					.setDisabled(!Platform.isDesktopApp || !this.plugin.settings.autoCreateDailyOnSchedule)
 					.onChange(async (value) => {
 						if (!isValidDailyCreationTime(value)) {
 							return;
@@ -610,7 +616,7 @@ class DailyNoteCreatorSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.autoCreateMissedDailies = value;
 						await this.plugin.saveSettings();
-						this.display();
+						this.render();
 					})
 				);
 		}
